@@ -5,8 +5,7 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - echo $ECR_LOGIN_URL
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${ECR_LOGIN_URL}
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${BASE_REPO_URI}
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | sed 's/[^a-zA-Z0-9]*[a-zA-Z0-9]//g6' | cut -c 1-7 )
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - docker pull $REPOSITORY_URI:latest || true
