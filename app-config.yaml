@@ -1,61 +1,66 @@
 app:
-  title: Backstage Demo
-  baseUrl: http://localhost:3000
-  support:
-    url: https://github.com/backstage/backstage/issues
-    items:
-      - title: Backstage Community
-        icon: chat
-        links:
-          - url: https://backstage.io/docs/overview/support
-            title: Support and community
-      - title: Backstage News
-        icon: docs
-        links:
-          - url: https://backstage.io/blog/
-            title: Backstage Blog
+  title: Backstage App
+  baseUrl: ${APP_DOMAIN}
 
 organization:
-  name: Backstage
+  name: Sparkfabrik
 
 backend:
-  baseUrl: http://localhost:7007
+  baseUrl: ${APP_DOMAIN}
   listen:
-    port: 7007
+    port: 7000
   csp:
     connect-src: ["'self'", 'http:', 'https:']
-    img-src: ["'self'", 'data:', 'https://backstage.io']
   cors:
-    origin: http://localhost:3000
+    origin: ${APP_DOMAIN}
     methods: [GET, POST, PUT, DELETE]
     credentials: true
   database:
-    client: better-sqlite3
-    connection: ':memory:'
-  reading:
-    allow:
-      - host: demo.backstage.io
-        paths:
-          - /api/graphql/schema
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST}
+      port: ${POSTGRES_PORT}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
 
 integrations:
   github:
     - host: github.com
       token: ${GITHUB_TOKEN}
 
+techdocs:
+  builder: 'external'
+  generators:
+    techdocs: 'local'
+  publisher:
+    type: 'awsS3'
+    awsS3:
+      bucketName: ${BUCKET_NAME}
+      region: ${DEFAULT_REGION}
+      credentials:
+        accessKeyId: ${ACCESS_KEY_ID}
+        secretAccessKey: ${SECRET_ACCESS_KEY}
+
 auth:
   environment: development
   providers:
     github:
       development:
-        clientId: ${GITHUB_DEVELOPMENT_CLIENT_ID}
-        clientSecret: ${GITHUB_DEVELOPMENT_CLIENT_SECRET}
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+
+scaffolder:
+  github:
+    visibility: private
 
 catalog:
-  readonly: true
   rules:
-    - allow: [Component, API, System, Domain, Resource, Location, User, Group]
+    - allow: [Component, System, API, Group, User, Resource, Location,Template]
   locations:
+     # AWS templates
+    - type: url
+      target: https://${SSM_GITLAB_HOSTNAME}/opa-admin/backstage-reference/-/blob/main/templates/all-templates.yaml
+
     # Backstage example components
     - type: url
       target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-components.yaml
@@ -68,50 +73,28 @@ catalog:
     - type: url
       target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-apis.yaml
 
-    # Backstage example organization groups
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml
-
-    # Backstage example domains
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-domains.yaml
-
     # Backstage example resources
     - type: url
       target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-resources.yaml
 
-    # The backstage demo deployment (this)
+    # Backstage example organization groups
     - type: url
-      target: https://github.com/backstage/demo/blob/master/catalog-info.yaml
+      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml
 
-    # The backstage library repository
+    # Backstage example templates
     - type: url
-      target: https://github.com/backstage/backstage/blob/master/catalog-info.yaml
-
-costInsights:
-  engineerCost: 200000
-  products:
-    computeEngine:
-      name: Compute Engine
-      icon: compute
-    cloudStorage:
-      name: Cloud Storage
-      icon: storage
-    bigQuery:
-      name: BigQuery
-      icon: search
-  metrics:
-    DAU:
-      name: Daily Active Users
-      default: true
-    MSC:
-      name: Monthly Subscribers
-
-# app-config.heroku.yaml replaces these values
-# These configs here are required for config validation in CI to pass
-techdocs:
-  builder: 'external'
-  generator:
-    runIn: 'local'
-  publisher:
-    type: 'local'
+      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/react-ssr-template/template.yaml
+      rules:
+        - allow: [Template]
+    - type: url
+      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/springboot-grpc-template/template.yaml
+      rules:
+        - allow: [Template]
+    - type: url
+      target: https://github.com/spotify/cookiecutter-golang/blob/master/template.yaml
+      rules:
+        - allow: [Template]
+    - type: url
+      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/docs-template/template.yaml
+      rules:
+        - allow: [Template]
