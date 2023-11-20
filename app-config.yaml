@@ -57,9 +57,9 @@ catalog:
   rules:
     - allow: [Component, System, API, Group, User, Resource, Location,Template]
   locations:
-     # AWS templates
+     # AWS example-serverless-rest-api templates
     - type: url
-      target: https://${SSM_GITLAB_HOSTNAME}/opa-admin/backstage-reference/-/blob/main/templates/all-templates.yaml
+      target: https://github.com/hieunguyenqn/backstage-app-aws/blob/main/backstage-templates/example-serverless-rest-api/template.yaml
 
     # Backstage example components
     - type: url
